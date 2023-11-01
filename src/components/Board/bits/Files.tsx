@@ -8,7 +8,7 @@ interface Props {
 const Files = ({files}: Props) => {
     return (
         <div className="files">
-            {files.map(file => <span key={file}>{getFileChar(file)}</span>)}
+            {files.map(file => <span key={file}>{getFileChar(file-1)}</span>)}
         </div>
     )
 }
