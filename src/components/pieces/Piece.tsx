@@ -4,9 +4,11 @@ interface Props {
   rank: number
   file: number
   piece: string
+  pieceAttack: boolean
+  pawnAttack: boolean
 }
 
-const Piece = ({ rank, file, piece }: Props) => {
+const Piece = ({ rank, file, piece, pieceAttack, pawnAttack }: Props) => {
   const onDragStart = (e: React.DragEvent) => {
     e.dataTransfer.effectAllowed = "move"
     e.dataTransfer.setData("text/plain", `${piece}-${7-rank}-${file}`)
@@ -22,9 +24,13 @@ const Piece = ({ rank, file, piece }: Props) => {
     target.style.display = "block"
   }
 
+  let className = `piece ${piece} p-${file}${rank}`
+  className += pieceAttack ? " PA" : ""
+  className += pawnAttack ? " pA" : ""
+
   return (
     <div
-      className={`piece ${piece} p-${file}${rank}`}
+      className={className}
       draggable={true}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
