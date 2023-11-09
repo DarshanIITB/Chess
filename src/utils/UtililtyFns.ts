@@ -119,14 +119,19 @@ export function extendPosition (move: string, position: string[][], turn: string
   console.log('Move: ', move)
 }
 
-const handlePawnMove = (move: string, position: string[][]) => {
-
-}
-
-export function checkValidity(finalSquare: number[], moves: number[][], isKingMove: boolean) {
+export function checkValidity(finalSquare: number[], moves: number[][]) {
   // ... return true if finalSquare is in moves
   return moves.some(move => move[0] === finalSquare[0] && move[1] === finalSquare[1])
 }
+
+
+export function isMoveValid (position: string[][], color: string, rank: number, file: number, newRank: number, newFile: number) {
+  let altPosition = JSON.parse(JSON.stringify(position))
+  altPosition[newRank][newFile] = altPosition[rank][file]
+  altPosition[rank][file] = ""
+  return !isKingInCheck(altPosition, color)
+}
+
 
 export function getTotalMoves (position: string[][], turn: string, enPassantTarget: string, castlingAvailability: string) {
   let moves: number[][] = []

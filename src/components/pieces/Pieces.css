@@ -14,10 +14,10 @@
 }
 
 .PA {
-    background-color: rgba(255, 0, 0, 0.5);
+    /* background-color: rgba(255, 0, 0, 0.5); */
 }
 .pA {
-    background-color: rgba(0, 255, 0, 0.5);
+    /* background-color: rgba(0, 255, 0, 0.5); */
 }
 
 .piece.k {background-image: url('../../assets/bk.png');}

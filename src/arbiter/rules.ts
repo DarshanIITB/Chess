@@ -1,4 +1,30 @@
-export const rules = {
+const getPieceRules = (piece: string) => {
+  switch (piece) {
+    case "r":
+      return rules.rook
+    case "R":
+      return rules.rook
+    case "n":
+      return rules.knight
+    case "N":
+      return rules.knight
+    case "b":
+      return rules.bishop
+    case "B":
+      return rules.bishop
+    case "q":
+      return rules.queen
+    case "Q":
+      return rules.queen
+    case "k":
+      return rules.king
+    case "K":
+      return rules.king
+  }
+  return { range: 0, directions: [] }
+}
+
+const rules = {
   rook: {
     range: 7,
     directions: [
@@ -64,4 +90,6 @@ export const rules = {
       [1, 1],
     ],
   },
-};
+}
+
+export { getPieceRules }

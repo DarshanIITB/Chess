@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react'
 import Piece from './Piece'
 import './Pieces.css'
-import { getPieceMoves, getMoves, isPiecePinned, getPawnAttacks, getAttackedSquares, getKingMoves, getPieceAttacks } from '../../arbiter/getMoves'
+import { getPieceMoves, getMoves, isPiecePinned, getAttackedSquares, getPieceAttacks } from '../../arbiter/getMoves'
+import { getPawnAttacks } from '../../arbiter/pawn'
+import { getKingMoves } from '../../arbiter/king'
 import { checkValidity, extendPosition, getFileChar, getPieceColor, getRankChar, parseFEN, startingFEN } from '../../utils/UtililtyFns'
 import { PieceType, Player, isSquareAttacked, getTotalMoves } from '../../utils/UtililtyFns'
 
@@ -11,9 +13,10 @@ const Pieces = () => {
     const castlingPositionFEN = 'rnbqk2r/ppp2ppp/3bpn2/3p4/3P4/2N1B3/PPPQPPPP/R3KBNR w KQkq - 0 1'
     const pinnedRookFEN = '2k5/3r4/8/8/8/7B/8/6K1 w'
     const enPassantFEN = '2k5/3r4/8/8/1Pp6/7B/8/6K1 b - b3 0 1'
-    const gameStatus = parseFEN(startingFEN)
+    const pinnedKnightFEN = 'r1bq1rk1/ppp3pp/2nb1p2/3np3/2B5/2NP1N2/PPPBQPPP/R4RK1 b - - 0 1'
+    const moveUpdateIssueFEN = 'r3qr1k/ppp3pp/2nb1p2/3BpN2/8/3P4/PPPBQPPP/R4RK1 b - - 0 1'
+    const gameStatus = parseFEN(moveUpdateIssueFEN)
     const [turn, setTurn] = useState<string>(gameStatus.turn)
-    const [castling, setCastling] = useState<string>(gameStatus.castlingAvailability)
     const [enPassantTarget, setEnPassantTarget] = useState<string>(gameStatus.enPassant)
     const [halfMove, setHalfMove] = useState<number>(parseInt(gameStatus.halfMove))
     const [castlingAvailability, setCastlingAvailability] = useState<string>(gameStatus.castlingAvailability)
@@ -100,13 +103,14 @@ const Pieces = () => {
             handleEnPassant(piece, originalRank, originalFile, finalRank, finalFile)
         }
         else if (piece === PieceType.BLACK_ROOK) {
-            if(originalFile === 0) {
+            if(originalFile === 0 && castlingAvailability.includes('q')) {
                 let newCastling = castlingAvailability.replace('q', '')
                 setCastlingAvailability(newCastling)
-            } else if (originalFile === 7) {
+            } else if (originalFile === 7 && castlingAvailability.includes('k')) {
                 let newCastling = castlingAvailability.replace('k', '')
                 setCastlingAvailability(newCastling)
             }
+            handleNormalMoves(piece, originalRank, originalFile, finalRank, finalFile)
         }
         else if (piece === PieceType.WHITE_ROOK) {
             if(originalFile === 0) {
@@ -116,6 +120,7 @@ const Pieces = () => {
                 let newCastling = castlingAvailability.replace('K', '')
                 setCastlingAvailability(newCastling)
             }
+            handleNormalMoves(piece, originalRank, originalFile, finalRank, finalFile)
         }
         // handle normal moves
         else {
@@ -137,23 +142,23 @@ const Pieces = () => {
 
     const onDrop = (e: React.DragEvent) => {
         e.preventDefault()
-        const[piece, originalRank, originalFile] = e.dataTransfer.getData('text/plain').split('-')
+        const [piece, originalRank, originalFile] = e.dataTransfer.getData('text/plain').split('-')
         const [originalRankInt, originalFileInt] = [parseInt(originalRank), parseInt(originalFile)]
         const availableMoves = getMoves(position, originalRankInt, originalFileInt, enPassantTarget, castlingAvailability)
-        console.log('Available moves', availableMoves)
         const finalSquare = getFinalSquare(e)
         const [rank, file] = finalSquare
-        const isKingMove = piece === 'K' || piece === 'k'
+        console.log('Original square:', originalRank, originalFile)
+        console.log('Final square:', rank, file)
+        console.log('Piece color:', getPieceColor(position[originalRankInt][originalFileInt]))
+        console.log('Piece', position[originalRankInt][originalFileInt])
+        console.log('Available moves:', availableMoves)
         console.log('Piece color:', getPieceColor(position[originalRankInt][originalFileInt]) === turn)
-        console.log('Validity:', checkValidity(finalSquare, availableMoves, isKingMove))
+        console.log('Validity:', checkValidity(finalSquare, availableMoves))
         if(getPieceColor(position[originalRankInt][originalFileInt]) === turn &&
-        checkValidity(finalSquare, availableMoves, isKingMove)) {
+        checkValidity(finalSquare, availableMoves)) {
             updatePosition(piece, originalRankInt, originalFileInt, rank, file)
         }
     }
-    // console.log('Total moves', getTotalMoves(position, 'w', enPassantTarget, castlingAvailability))
-    // console.log('Is 4, 7 attacked?', isSquareAttacked(position, [4, 7], Player.WHITE, castlingAvailability))
-    // console.log('Is piece Pinned', isPiecePinned(position, 1, 3))
     let pieceAttacks = new Array(8)
     let pawnAttacks = new Array(8)
     for(let i = 0; i < 8; i++) {
@@ -168,11 +173,6 @@ const Pieces = () => {
     pawnAttackedSquares.forEach(([rank, file]) => {
         pawnAttacks[rank][file] = true
     })
-    // console.log('Pawn attacks', getPawnAttacks(position, Player.WHITE))
-    // console.log('Piece moves', getPieceMoves(position, 2, 5, castlingAvailability))
-    // console.log(getKingMoves(position, 0, 4, castlingAvailability))
-    // console.log(isSquareAttacked(position, [1, 6], Player.WHITE, castlingAvailability))
-    // console.log(position[1][6] === '')
 
     const onDragOver = (e: React.DragEvent) => {
         e.preventDefault()
